@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/14 15:25:23 by kohmatsu          #+#    #+#             */
-/*   Updated: 2023/02/15 17:50:07 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/15 19:50:10 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,19 +18,19 @@
 //     system("leaks -q pipex");
 // }
 
-// void    safty_free(char **str)
-// {
-//     int i;
+void    safty_free(char **str)
+{
+    int i;
 
-//     i = 0;
-//     while (str[i])
-//     {
-//         free(str[i]);
-//         i++;
-//     }
-//     free(str);
-//     str = NULL;
-// }
+    i = 0;
+    while (str[i])
+    {
+        free(str[i]);
+        i++;
+    }
+    free(str);
+    str = NULL;
+}
 
 
 // void    dopipes(int i, t_info *info)
@@ -201,6 +201,38 @@ char    *make_exepath(char *path, char *command)
     return (exe_path);
 }
 
+int count_splitable(t_info *info, int start, int end)
+{
+    int count;
+
+    count = 0;
+    while (start <= end)
+    {
+        if (ft_strchr(info->cmd[start], ' '))
+            count++;
+        start++;
+    }
+    
+}
+
+char    *ft_strndup(char *str, int n)
+{
+    char    *ret;
+
+    ret = (char *)malloc(sizeof(char) * (n + 1));
+    if (!ret)
+        return (NULL);
+    while (n >= 0)
+    {
+        *ret = *str;
+        ret++;
+        str++;
+        n--;
+    }
+    *ret = '\0';
+    return (ret);
+}
+
 void    dopipes(int i, t_info *info)
 {
     pid_t   ret;
@@ -211,26 +243,71 @@ void    dopipes(int i, t_info *info)
     
     exe_path = NULL;
     argv_index = 0;
-    if (info->pipe_count == i)//一番左のコマンド
-    {
-    }
-    else if (i == 0)//一番右のコマンド
+    if (i == 0)//一番右のコマンド
     {
         pipe_index = info->pipe_place[i] + 1;
-        info->argv = (char **)malloc(sizeof(char *) * (info->argc - pipe_index + 1));
+        info->argv = (char **)malloc(sizeof(char *) * (info->argc - info->pipe_place[0] + count_splitable(info, info->pipe_place[0], info->argc)));
         if (info->argv == NULL)
             fatal_error("malloc");
-        while (pipe_index < info->argc + 1)
+        while (pipe_index < info->argc)
+        {
+            if (ft_strchr(info->cmd[pipe_index], ' '))
+            {
+                
+            }
+            info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
+            argv_index++;
+            pipe_index++;
+        }
+        info->argv[argv_index] = NULL;
+        // while (*(info->argv))
+        // {
+        //     printf("%s\n", *info->argv);
+        //     (info->argv)++;
+        // }
+        // exit(1);
+    }
+    else if (info->pipe_count == i)//一番左のコマンド
+    {
+        safty_free(info->argv);
+        pipe_index = 0;
+        info->argv = (char **)malloc(sizeof(char *) * (info->pipe_place[i - 1] + 1));
+        if (info->argv == NULL)
+            fatal_error("malloc");
+        while (pipe_index < info->pipe_place[i - 1])
         {
             info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
             argv_index++;
             pipe_index++;
         }
         info->argv[argv_index] = NULL;
+        while (*(info->argv))
+        {
+            printf("%s\n", *info->argv);
+            (info->argv)++;
+        }
+        exit(1);
     }
     else//それ以外の場所
     {
-        
+        safty_free(info->argv);
+        pipe_index = info->pipe_place[i] + 1;
+        info->argv = (char **)malloc(sizeof(char *) * (info->pipe_place[i - 1] - info->pipe_place[i]));
+        if (info->argv == NULL)
+            fatal_error("malloc");
+        while (pipe_index < info->pipe_place[i - 1])
+        {
+            info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
+            argv_index++;
+            pipe_index++;
+        }
+        info->argv[argv_index] = NULL;
+        // while (*(info->argv))
+        // {
+        //     printf("%s\n", *info->argv);
+        //     (info->argv)++;
+        // }
+        // exit(1);
     }
 }
 
@@ -248,7 +325,7 @@ void    multiple_pipes(t_info *info)
 {
     pid_t   ret;
 
-    printf("%s\n", info->argv[0]);
+    // printf("%s\n", info->argv[0]);
 
     if ((ret = fork()) == -1)
     {
@@ -258,7 +335,7 @@ void    multiple_pipes(t_info *info)
     else if (ret == 0)
     {
         // printf("%s, %d\n", __FILE__, __LINE__);
-        dopipes(0, info);
+        dopipes(2, info);
     }
     else
         wait(NULL);
@@ -267,9 +344,9 @@ void    multiple_pipes(t_info *info)
     //         printf("%s\n", *info->argv);
     //         info->argv++;
     //     }
-    printf("%s\n", info->argv[0]);
-    printf("%s\n", info->argv[1]);
-    exit(1);
+    // printf("%s\n", info->argv[0]);
+    // printf("%s\n", info->argv[1]);
+    // exit(1);
 }
 
 int count_pipe(t_info *info)
@@ -348,6 +425,8 @@ int pipex(int argc, char **argv)
     int			wstatus;
     
     info_init(&info, argc, argv);
+    // printf("%d\n", info.pipe_count);
+    // exit(1);
     // printf("%s, %d\n", __FILE__, __LINE__);
     multiple_pipes(&info);
     // printf("%s, %d\n", __FILE__, __LINE__);
