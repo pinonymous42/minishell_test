@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/14 15:25:23 by kohmatsu          #+#    #+#             */
-/*   Updated: 2023/02/15 20:50:12 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/15 20:44:03 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,6 @@ void    dopipes(int i, t_info *info)
                     argv_index++;
                     tmp++;
                 }
-                safty_free(tmp);
             }
             else
                 info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
@@ -285,18 +284,7 @@ void    dopipes(int i, t_info *info)
             fatal_error("malloc");
         while (pipe_index < info->pipe_place[i - 1])
         {
-            if (ft_strchr(info->cmd[pipe_index], ' '))
-            {
-                tmp = ft_split(info->cmd[pipe_index], ' ');
-                while (*tmp)
-                {
-                    info->argv[argv_index] = ft_strdup(*tmp);
-                    argv_index++;
-                    tmp++;
-                }
-            }
-            else
-                info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
+            info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
             argv_index++;
             pipe_index++;
         }

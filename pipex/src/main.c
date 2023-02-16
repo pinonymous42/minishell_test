@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: matsushimakouhei <matsushimakouhei@stud    +#+  +:+       +#+        */
+/*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/06 00:04:47 by matsushimak       #+#    #+#             */
-/*   Updated: 2023/02/12 13:09:51 by matsushimak      ###   ########.fr       */
+/*   Updated: 2023/02/15 20:08:55 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,17 +155,6 @@ void    make_info_cmd(t_info *info, char **argv, int argc)
     }
     info->cmd[j] = NULL;
 
-    // i = 0;
-    // while (info->cmd[i])
-    // {
-    //     j = 0;
-    //     while(info->cmd[i][j])
-    //     {
-    //         printf("%s\n", info->cmd[i][j]);
-    //         j++;
-    //     }
-    //     i++;
-    // }
 }
 
 void    run_heredoc(t_info *info, char **argv, int argc)
