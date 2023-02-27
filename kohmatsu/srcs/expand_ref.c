@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/22 01:40:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/26 18:02:47 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:34:27 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ char    *double_variable_expand(char *new_word, t_environ *list)
     new_word++;
     if (*new_word == '?')
     {
-        ret = ft_strjoin_with_free(ret, ft_itoa(g_signal), FIRST_PARAM);
+        ret = ft_strjoin_with_free(ret, ft_itoa(g_signal.status), FIRST_PARAM);
         new_word++;
     }
     else
@@ -139,7 +139,7 @@ void	quote_removal(t_token *tok, t_environ *list)
                 if (*p == '?')
                 {
                     p++;
-                    new_word = ft_itoa(g_signal);
+                    new_word = ft_itoa(g_signal.status);
                 }
                 else
                 {

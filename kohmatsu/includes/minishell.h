@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 22:43:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/26 18:03:32 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:33:18 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,12 @@ typedef struct s_environ {
     struct s_environ *next;
 }t_environ;
 
+typedef struct s_signal {
+    int status;
+}t_signal;
+
 //global variable
-int g_signal;
+t_signal g_signal;
 
 //token_list_to_array.c
 char	**token_list_to_array(t_token *token);

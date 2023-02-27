@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 12:54:49 by kohmatsu          #+#    #+#             */
-/*   Updated: 2023/02/26 18:05:30 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:33:40 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void    signal_handler(int sig)
 {
-    g_signal = 1;
+    g_signal.status = 1;
     rl_on_new_line();
     rl_replace_line("", 0);
     write(1, "\n", 1);
@@ -46,8 +46,8 @@ int set_signal_parent()
 //     // printf("%s, %d\n", __FILE__, __LINE__);
 //     (void)signal;
 //     write(1, "\n", 1);
-//     g_signal = 1;
-//     // printf("%d\n", g_signal);
+//     g_signal.status = 1;
+//     // printf("%d\n", g_signal.status);
 // }
 
 // int    heredoc_signal(void)

@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/22 01:40:43 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/26 18:08:39 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:34:00 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -569,16 +569,16 @@ void    multiple_pipes(t_info *info)
         // if (wstatus < 256)
         // {
         if (wstatus == SIGINT || wstatus == SIGQUIT)
-            g_signal = 128 + wstatus;
+            g_signal.status = 128 + wstatus;
         else
-            g_signal = WEXITSTATUS(wstatus);
+            g_signal.status = WEXITSTATUS(wstatus);
         // }
         // else
         // {
         //     printf("<%d>\n", wstatus);
-        //     // g_signal = wstatus / 256;
-        //     g_signal = WEXITSTATUS(wstatus);
-        //     printf("%d\n", g_signal);
+        //     // g_signal.status = wstatus / 256;
+        //     g_signal.status = WEXITSTATUS(wstatus);
+        //     printf("%d\n", g_signal.status);
         // }
     }
 }

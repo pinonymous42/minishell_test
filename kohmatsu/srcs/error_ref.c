@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/21 15:33:36 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/26 18:04:22 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/27 15:34:35 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void    tokenize_error(char *message, char **rest, char *line, bool *syntax_erro
     while (*line)
 		line++;
 	*rest = line;
-	g_signal = 258;
+	g_signal.status = 258;
 }
 
 //minishell自体を終わらせたいからexitする
@@ -93,6 +93,6 @@ void	assert_error(const char *msg)
 void	err_exit(const char *location, const char *msg)
 {
 	my_dprintf(STDERR_FILENO, "minishell: %s: %s\n", location, msg);
-	// g_signal = 127;
+	// g_signal.status = 127;
 	exit(127);
 }
