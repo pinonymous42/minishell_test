@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/22 01:40:43 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/27 15:34:00 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/28 13:57:25 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,25 +209,25 @@ void    do_output(t_info *info, int i)
 
 void    do_heredoc_one(t_info *info, int i)
 {
-    char    *line;
+    // char    *line;
     char    **tmp;
     int     argv_index;
     int     tmp_index;
         
-    info->input_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
-    if (info->input_fd == -1)
-        function_error("open");
-    while (1)
-    {
-        write(STDOUT, "> ", 2);
-        // heredoc_signal();
-        line = get_next_line(STDIN);
-        if (ft_strncmp(line, info->argv[i + 1], ft_strlen(info->argv[i + 1])) == 0)
-            break ;
-        write(info->input_fd, line, ft_strlen(line));
-        free(line);
-    }
-    close(info->input_fd);
+    // info->input_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
+    // if (info->input_fd == -1)
+    //     function_error("open");
+    // while (1)
+    // {
+    //     write(STDOUT, "> ", 2);
+    //     // heredoc_signal();
+    //     line = get_next_line(STDIN);
+    //     if (ft_strncmp(line, info->argv[i + 1], ft_strlen(info->argv[i + 1])) == 0)
+    //         break ;
+    //     write(info->input_fd, line, ft_strlen(line));
+    //     free(line);
+    // }
+    // close(info->input_fd);
     info->input_fd = open(".heredoc", O_RDONLY);
     if (info->input_fd == -1)
         function_error("open");
@@ -263,36 +263,36 @@ void    do_heredoc_one(t_info *info, int i)
 
 void    do_heredoc_not_one(t_info *info, int i)
 {
-    char    *line;
+    // char    *line;
     char    **tmp;
     int     argv_index;
     int     tmp_index;
     
-    if (ft_strncmp(info->argv[i + 4], "<<", 2) == 0)
-        return ;
-    info->heredoc_flag = 1;
-    info->input_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
-    if (info->input_fd == -1)
-        function_error("open");
-    // heredoc_signal();
-    while (1)
-    {
-        write(STDOUT, "> ", 2);
-        line = get_next_line(STDIN);
-        if (ft_strncmp(line, info->argv[i + 1], ft_strlen(info->argv[i + 1])) == 0)
-            break ;
-        free(line);
-    }
-    while (1)
-    {
-        write(STDOUT, "> ", 2);
-        line = get_next_line(STDIN);
-        if (ft_strncmp(line, info->argv[i + 3], ft_strlen(info->argv[i + 3])) == 0)
-            break ;
-        write(info->input_fd, line, ft_strlen(line));
-        free(line);
-    }
-    close(info->input_fd);
+    // if (ft_strncmp(info->argv[i + 4], "<<", 2) == 0)
+    //     return ;
+    // info->heredoc_flag = 1;
+    // info->input_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
+    // if (info->input_fd == -1)
+    //     function_error("open");
+    // // heredoc_signal();
+    // while (1)
+    // {
+    //     write(STDOUT, "> ", 2);
+    //     line = get_next_line(STDIN);
+    //     if (ft_strncmp(line, info->argv[i + 1], ft_strlen(info->argv[i + 1])) == 0)
+    //         break ;
+    //     free(line);
+    // }
+    // while (1)
+    // {
+    //     write(STDOUT, "> ", 2);
+    //     line = get_next_line(STDIN);
+    //     if (ft_strncmp(line, info->argv[i + 3], ft_strlen(info->argv[i + 3])) == 0)
+    //         break ;
+    //     write(info->input_fd, line, ft_strlen(line));
+    //     free(line);
+    // }
+    // close(info->input_fd);
     info->input_fd = open(".heredoc", O_RDONLY);
     if (info->input_fd == -1)
         function_error("open");
@@ -467,6 +467,7 @@ void    dopipes(int i, t_info *info)
         }
         if (ret == 0)
         {
+            // close(1);
             close(pipefd[0]);
             dup2(pipefd[1], STDOUT);
             close(pipefd[1]);
@@ -569,9 +570,15 @@ void    multiple_pipes(t_info *info)
         // if (wstatus < 256)
         // {
         if (wstatus == SIGINT || wstatus == SIGQUIT)
+        {
             g_signal.status = 128 + wstatus;
+            g_signal.other_code = TRUE;
+        }
         else
+        {
             g_signal.status = WEXITSTATUS(wstatus);
+            g_signal.other_code = TRUE;
+        }
         // }
         // else
         // {

@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 22:43:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/27 15:33:18 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/28 12:49:30 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,9 @@
 
 # define STDIN 0
 # define STDOUT 1
+
+# define TRUE 1
+# define FALSE 0
 
 typedef enum e_error_kind{
     TOKENIZE_ERROR,
@@ -78,7 +81,10 @@ typedef struct s_environ {
 }t_environ;
 
 typedef struct s_signal {
-    int status;
+    int status;//status code
+    int heredoc_fd;//.heredocのfd
+    int input_fd;//input(0)のfd
+    int other_code;//status codeが0以外の時に用いる
 }t_signal;
 
 //global variable
@@ -93,20 +99,21 @@ void	free_array(char **array);
 
 //error_ref.c
 void    function_error(char *function_name);
-void    tokenize_error(char *message, char **rest, char *line, bool *syntax_error);
+void    tokenize_error(char *message, char **rest, char *line);
 void	assert_error(const char *msg);
 void	err_exit(const char *location, const char *msg);
 
 //pipe_ref.c
 void     pipex(int argc, char *argv[], t_environ *list);
+int count_heredoc(char **argv);
 
 //tokenize_ref.c
-t_token *tokenize(char *line, bool *syntax_error);
+t_token *tokenize(char *line);
 bool    is_metacharacter(char c);
 char *ft_strndup(char *str, size_t n);
 
 //expand_ref.c
-void	expand(t_token *tok, t_environ *list);
+char	**expand(t_token *tok, t_environ *list);
 
 //make_environ.c
 t_environ *make_environ(char **envp);

@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 17:19:10 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/27 15:34:14 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/28 14:28:57 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,10 @@ void process_line(char *line, t_environ *list)
     t_token *token;
 	char	**array;
 	int		argc;
-	bool	syntax_error;
+	// bool	syntax_error;
 
-	syntax_error = false;
-    token = tokenize(line, &syntax_error);
+	// syntax_error = false;
+    token = tokenize(line);
     // while (token)
     // {
     //     printf("%s\n", token->word);
@@ -46,17 +46,17 @@ void process_line(char *line, t_environ *list)
     //     *status = TOKENIZE_ERROR;
     else
     {
-		expand(token, list);
-        // printf("%s, %d\n", __FILE__, __LINE__);
+		array = expand(token, list);
         // while (token)
         // {
         //     printf("%s\n", token->word);
         //     token = token->next;
         // }
         // exit(1);
-		array = token_list_to_array(token);
+		// array = token_list_to_array(token);
 		argc = count_argv(array);
-		pipex(argc, array, list);
+        if (g_signal.other_code == FALSE)
+		    pipex(argc, array, list);
 		free_array(array);
     }
     unlink("./.heredoc");
@@ -68,11 +68,15 @@ int main(int argc, char **argv, char **envp)
     char *line;
     t_environ *list;
 
-    g_signal.status = 0;
+    // g_signal.status = 0;
+    g_signal.other_code = FALSE;
     list = make_environ(envp);
     while (1)
     {
-        // printf("|%d|\n", g_signal.status);
+        if (g_signal.other_code == FALSE)
+            g_signal.status = 0;
+        g_signal.other_code = FALSE;
+        g_signal.input_fd = dup(0);
         set_signal();
         line = readline("minishell$ ");
         if (line == NULL)
@@ -82,5 +86,6 @@ int main(int argc, char **argv, char **envp)
         process_line(line, list);
         free(line);
     }
+    write(1, "exit\n", 5);
     return (0);
 }

@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: matsushimakouhei <matsushimakouhei@stud    +#+  +:+       +#+        */
+/*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/07 18:00:31 by kohmatsu          #+#    #+#             */
-/*   Updated: 2023/02/06 13:36:46 by matsushimak      ###   ########.fr       */
+/*   Updated: 2023/02/27 15:55:36 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include "../includes/minishell.h"
 
 char	*do_it(char **save, int fd, char *line)
 {

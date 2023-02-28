@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/23 15:03:28 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/26 14:09:32 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/27 13:44:29 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ char *ft_strndup(char *str, size_t n)
     return (new_str);
 }
 
-static t_token *handle_word(char **rest, char *line, bool *syntax_error)
+static t_token *handle_word(char **rest, char *line)
 {
     t_token *token;
     char    *start;
@@ -157,7 +157,7 @@ static t_token *handle_word(char **rest, char *line, bool *syntax_error)
 				line++;
             if (*line == '\0')
 			{
-				tokenize_error("Unclosed quote", &line, line, syntax_error);
+				tokenize_error("Unclosed quote", &line, line);
 				break ;
             }
             else
@@ -170,7 +170,7 @@ static t_token *handle_word(char **rest, char *line, bool *syntax_error)
 				line++;
             if (*line == '\0')
 			{
-				tokenize_error("Unclosed quote", &line, line, syntax_error);
+				tokenize_error("Unclosed quote", &line, line);
 				break ;
             }
             else
@@ -187,7 +187,7 @@ static t_token *handle_word(char **rest, char *line, bool *syntax_error)
 	return (token);
 }
 
-t_token *tokenize(char *line, bool *syntax_error)
+t_token *tokenize(char *line)
 {
     t_token *head;
     t_token *token;
@@ -209,7 +209,7 @@ t_token *tokenize(char *line, bool *syntax_error)
         }
         else
         {
-            token = handle_word(&line, line, syntax_error);
+            token = handle_word(&line, line);
             append_token(&head, token);
         }
     }

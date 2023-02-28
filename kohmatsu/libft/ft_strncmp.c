@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/05 18:32:47 by kohmatsu          #+#    #+#             */
-/*   Updated: 2022/10/21 13:20:30 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/02/28 12:37:33 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 	unsigned char	*tmp1;
 	unsigned char	*tmp2;
 
+	if (s1 == NULL || s2 == NULL)
+		return (1);
 	if (n == 0)
 		return (0);
 	tmp1 = (unsigned char *)s1;
