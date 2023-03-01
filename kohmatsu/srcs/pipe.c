@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipe_ref.c                                         :+:      :+:    :+:   */
+/*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/22 01:40:43 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/28 13:57:25 by kohmatsu         ###   ########.fr       */
+/*   Created: 2023/02/28 23:07:46 by kohmatsu          #+#    #+#             */
+/*   Updated: 2023/03/01 18:39:54 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,53 @@ void    safty_free(char **str)
     str = NULL;
 }
 
+void    malloc_error_free(int **pipefd, int i)
+{
+    while (i >= 0)
+    {
+        free(pipefd[i]);
+        i--;
+    }
+    free(pipefd);
+    pipefd = NULL;
+}
+
+int count_list_len(t_environ *list)
+{
+    int count;
+
+    count = 0;
+    while (list != NULL)
+    {
+        count++;
+        list = list->next;
+    }
+    return (count);
+}
+
+char **list_to_array(t_environ *list)
+{
+    char **ret;
+    char *tmp;
+    int i;
+    
+    i = 0;
+    ret = (char **)malloc(sizeof(char *) * (count_list_len(list) + 1));
+    if (!ret)
+        function_error("malloc");
+    while (list != NULL)
+    {
+        // printf("%s, %d\n", __FILE__, __LINE__);
+        tmp = ft_strjoin(list->key, "=");
+        ret[i] = ft_strjoin(tmp, list->value);
+        free(tmp);
+        list = list->next;
+        i++;
+    }
+    ret[i] = NULL;
+    return (ret);
+}
+
 char    *make_exepath(char *path, char *command)
 {
     char    *exe_path;
@@ -41,40 +88,6 @@ char    *make_exepath(char *path, char *command)
     free(tmp);
     return (exe_path);
 }
-
-char	*search_path(const char *filename)
-{
-	char	path[PATH_MAX];
-	char	*value;
-	char	*end;
-	value = getenv("PATH");
-	while (*value)
-	{
-        //bzero(path, PATH_MAX);
-		ft_bzero(path, PATH_MAX);
-		end = ft_strchr(value, ':');
-		if (end)
-			//strncpy(path, value, end - value);
-            ft_strlcpy(path, value, end - value + 1);
-		else
-			ft_strlcpy(path, value, PATH_MAX);
-		ft_strlcat(path, "/", PATH_MAX);
-		ft_strlcat(path, filename, PATH_MAX);
-		if (access(path, X_OK) == 0)
-		{
-			char	*dup;
-			dup = ft_strdup(path);
-			if (dup == NULL)
-				function_error("strdup");
-			return (dup);
-		}
-		if (end == NULL)
-			return (NULL);
-		value = end + 1;
-	}
-	return (NULL);
-}
-
 
 int count_splitable(t_info *info, int start, int end)
 {
@@ -90,49 +103,6 @@ int count_splitable(t_info *info, int start, int end)
     return (count);
 }
 
-void    make_info_argv(t_info *info, int end, int start, int part)
-{
-    int pipe_index;
-    char    **tmp;
-    int argv_index;
-    
-    argv_index = 0;
-    if (info->argv && (part == LEFT || part == MID))
-        safty_free(info->argv);
-    pipe_index = start + 1;
-    info->argv_count = end - start + count_splitable(info, pipe_index, end);
-    info->argv = (char **)malloc(sizeof(char *) * (info->argv_count));
-    if (info->argv == NULL)
-        function_error("malloc1");
-    while (pipe_index < end)
-    {
-        /*
-        if (ft_strchr(info->cmd[pipe_index], ' '))
-        {
-            tmp = ft_split(info->cmd[pipe_index], ' ');
-            while (*tmp)
-            {
-                info->argv[argv_index] = ft_strdup(*tmp);
-                if (!info->argv[argv_index])
-                    function_error("strdup");
-                argv_index++;
-                tmp++;
-            }
-            safty_free(tmp);
-        }
-        */
-        //else
-        //{
-        info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
-        if (!info->argv[argv_index])
-            function_error("strdup");
-        argv_index++;
-        //}
-        pipe_index++;
-    }
-    info->argv[argv_index] = NULL;
-}
-
 void    do_input(t_info *info, int i)
 {
     char    **tmp;
@@ -143,7 +113,10 @@ void    do_input(t_info *info, int i)
     tmp_index = 0;
     info->input_fd = open(info->argv[i + 1], O_RDONLY);
     if (info->input_fd == -1)
+    {
+        // printf("%s, %d\n", __FILE__, __LINE__);
         err_exit(info->argv[i + 1], "command not found");
+    }
         // function_error("open");
     dup2(info->input_fd, STDIN);
     tmp = (char **)malloc(sizeof(char *) * ((info->argv_count - 2)));
@@ -209,25 +182,10 @@ void    do_output(t_info *info, int i)
 
 void    do_heredoc_one(t_info *info, int i)
 {
-    // char    *line;
     char    **tmp;
     int     argv_index;
     int     tmp_index;
         
-    // info->input_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
-    // if (info->input_fd == -1)
-    //     function_error("open");
-    // while (1)
-    // {
-    //     write(STDOUT, "> ", 2);
-    //     // heredoc_signal();
-    //     line = get_next_line(STDIN);
-    //     if (ft_strncmp(line, info->argv[i + 1], ft_strlen(info->argv[i + 1])) == 0)
-    //         break ;
-    //     write(info->input_fd, line, ft_strlen(line));
-    //     free(line);
-    // }
-    // close(info->input_fd);
     info->input_fd = open(".heredoc", O_RDONLY);
     if (info->input_fd == -1)
         function_error("open");
@@ -236,10 +194,8 @@ void    do_heredoc_one(t_info *info, int i)
     tmp_index = 0;
     dup2(info->input_fd, STDIN);
     tmp = (char **)malloc(sizeof(char *) * ((info->argv_count - 2)));
-    // printf("%s, %d\n", __FILE__, __LINE__);
     if (tmp == NULL)
         function_error("malloc4");
-    // printf("%s, %d\n", __FILE__, __LINE__);
     while (argv_index != i)
     {
         tmp[tmp_index] = ft_strdup(info->argv[argv_index]);
@@ -263,36 +219,11 @@ void    do_heredoc_one(t_info *info, int i)
 
 void    do_heredoc_not_one(t_info *info, int i)
 {
-    // char    *line;
     char    **tmp;
     int     argv_index;
     int     tmp_index;
     
-    // if (ft_strncmp(info->argv[i + 4], "<<", 2) == 0)
-    //     return ;
-    // info->heredoc_flag = 1;
-    // info->input_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
-    // if (info->input_fd == -1)
-    //     function_error("open");
-    // // heredoc_signal();
-    // while (1)
-    // {
-    //     write(STDOUT, "> ", 2);
-    //     line = get_next_line(STDIN);
-    //     if (ft_strncmp(line, info->argv[i + 1], ft_strlen(info->argv[i + 1])) == 0)
-    //         break ;
-    //     free(line);
-    // }
-    // while (1)
-    // {
-    //     write(STDOUT, "> ", 2);
-    //     line = get_next_line(STDIN);
-    //     if (ft_strncmp(line, info->argv[i + 3], ft_strlen(info->argv[i + 3])) == 0)
-    //         break ;
-    //     write(info->input_fd, line, ft_strlen(line));
-    //     free(line);
-    // }
-    // close(info->input_fd);
+    printf("%s, %d\n", __FILE__, __LINE__);
     info->input_fd = open(".heredoc", O_RDONLY);
     if (info->input_fd == -1)
         function_error("open");
@@ -301,10 +232,8 @@ void    do_heredoc_not_one(t_info *info, int i)
     tmp_index = 0;
     dup2(info->input_fd, STDIN);
     tmp = (char **)malloc(sizeof(char *) * ((info->argv_count - 2)));
-    // printf("%s, %d\n", __FILE__, __LINE__);
     if (tmp == NULL)
         function_error("malloc4");
-    // printf("%s, %d\n", __FILE__, __LINE__);
     while (argv_index != i)
     {
         tmp[tmp_index] = ft_strdup(info->argv[argv_index]);
@@ -386,10 +315,16 @@ void    check_redirect(t_info *info)
     heredoc_count = count_heredoc(info->argv);
     while ((info->argv)[i] != NULL)
     {
+        // printf("|%s|\n", info->argv[i]);
+        // printf(">%d<\n", info->heredoc_flag);
         if (ft_strncmp((info->argv)[i], "<<", 2) == 0 && info->heredoc_flag == 0)
         {
+            // printf("%s, %d\n", __FILE__, __LINE__);
             if (heredoc_count == 1)
+            {
+                // printf("%s, %d\n", __FILE__, __LINE__);
                 do_heredoc_one(info, i);
+            }
             else
                 do_heredoc_not_one(info, i);
             continue;
@@ -401,6 +336,7 @@ void    check_redirect(t_info *info)
         }
         else if (*(info->argv)[i] == '<')
         {
+            printf("%s, %d\n", __FILE__, __LINE__);
             do_input(info, i);
             continue;
         }
@@ -413,183 +349,133 @@ void    check_redirect(t_info *info)
     }
 }
 
-void    dopipes(int i, t_info *info)
+//////////////////////////////////////////////////////////////////ここから下は作成途中
+
+void    make_info_argv(t_info *info, int end, int start)
 {
-    pid_t   ret;
-    int     pipefd[2];
-    char    *exe_path;
-    int     index;
+    int pipe_index;
+    char    **tmp;
+    int argv_index;
     
-    exe_path = NULL;
-    index = 0;
-    set_signal_child();
-    if (info->pipe_count == i)//一番左のコマンド
+    argv_index = 0;
+    if (info->argv)
+        safty_free(info->argv);
+    pipe_index = start + 1;
+    info->argv_count = end - start + count_splitable(info, pipe_index, end);
+    info->argv = (char **)malloc(sizeof(char *) * (info->argv_count));
+    if (info->argv == NULL)
+        function_error("malloc1");
+    while (pipe_index < end)
     {
-        if (info->pipe_count != 0)
-            make_info_argv(info, info->pipe_place[i - 1], -1, LEFT);
-        else
-            make_info_argv(info, info->argc, -1, LEFT);
-        /////////////////////////////////////////////////////////////////////////////////////実行コマンド作成
-        check_redirect(info);
-        exe_path = info->argv[0];
-        if (ft_strchr(exe_path, '/') == NULL)
-            exe_path = search_path(exe_path);
-        /*
-        while (access(exe_path, X_OK))
-        {
-            if (ft_strchr(info->argv[0], '/') == NULL)
-                exe_path = make_exepath((info->path)[index], (info->argv)[0]);
-            else
-                exe_path = info->argv[0];
-            index++;
-        }
-        */
-        if (exe_path == NULL)
-        {
-            // printf("%s, %d\n", __FILE__, __LINE__);
-            err_exit(info->argv[0], "command not found");
-        }
-        if (access(exe_path, X_OK) < 0)
-            err_exit(info->argv[0], "command not found");
-        execve(exe_path, info->argv, info->envp);
-        function_error("execve");
+        info->argv[argv_index] = ft_strdup(info->cmd[pipe_index]);
+        if (!info->argv[argv_index])
+            function_error("strdup");
+        argv_index++;
+        pipe_index++;
     }
-    else if (i == 0)//一番右のコマンド
+    info->argv[argv_index] = NULL;
+}
+
+void    do_fd(t_info *info, int i)
+{
+    int j;
+
+    j = 0;
+    if (info->input_fd == 0)
     {
-        make_info_argv(info, info->argc, info->pipe_place[0], RIGHT);
-        /////////////////////////////////////////////////////////////////////////////////////実行コマンド作成
-        check_redirect(info);
-        pipe(pipefd);
-        if ((ret = fork()) == -1)
-        {
-            perror("fork");
-            exit(1);
-        }
-        if (ret == 0)
-        {
-            // close(1);
-            close(pipefd[0]);
-            dup2(pipefd[1], STDOUT);
-            close(pipefd[1]);
-            dopipes(i + 1, info);
-        }
-        else
-        {
-            close(pipefd[1]);
-            dup2(pipefd[0], STDIN);
-            close(pipefd[0]);
-            exe_path = info->argv[0];
-            if (ft_strchr(exe_path, '/') == NULL)
-                exe_path = search_path(exe_path);
-            /*
-            while (access(exe_path, X_OK))
-            {
-                if (ft_strchr(info->argv[0], '/') == NULL)
-                    exe_path = make_exepath((info->path)[index], (info->argv)[0]);
-                else
-                    exe_path = info->argv[0];
-                index++;
-            }
-            */
-            if (exe_path == NULL)
-                err_exit(info->argv[0], "command not found");
-            if (access(exe_path, X_OK) < 0)
-                err_exit(info->argv[0], "command not found");
-            execve(exe_path, info->argv, info->envp);
-            function_error("execve");
-        }
+        if (i != 0)
+            dup2(info->pipefd[i - 1][0], 0);
     }
-    else//それ以外の場所
+    if (info->output_fd == 1)
     {
-        make_info_argv(info, info->pipe_place[i - 1], info->pipe_place[i], MID);
-        /////////////////////////////////////////////////////////////////////////////////////実行コマンド作成
-        check_redirect(info);
-        pipe(pipefd);
-        if ((ret = fork()) == -1)
-        {
-            perror("fork");
-            exit(1);
-        }
-        if (ret == 0)
-        {
-            close(pipefd[0]);
-            dup2(pipefd[1], STDOUT);
-            close(pipefd[1]);
-            dopipes(i + 1, info);
-        }
-        else
-        {
-            close(pipefd[1]);
-            dup2(pipefd[0], STDIN);
-            close(pipefd[0]);
-            exe_path = info->argv[0];
-            if (ft_strchr(exe_path, '/') == NULL)
-                exe_path = search_path(exe_path);
-            /*
-            while (access(exe_path, X_OK))
-            {
-                if (ft_strchr(info->argv[0], '/') == NULL)
-                    exe_path = make_exepath((info->path)[index], (info->argv)[0]);
-                else
-                    exe_path = info->argv[0];
-                index++;
-            }
-            */
-            if (exe_path == NULL)
-                err_exit(info->argv[0], "command not found");
-            if (access(exe_path, X_OK) < 0)
-                err_exit(info->argv[0], "command not found");
-            execve(exe_path, info->argv, info->envp);
-            function_error("execve");
-        }
+        if (i != info->pipe_count)
+            dup2(info->pipefd[i][1], 1);  
+    }
+    while (j < info->pipe_count)
+    {
+        close(info->pipefd[j][0]);
+        close(info->pipefd[j][1]);
+        j++;
     }
 }
 
 void    multiple_pipes(t_info *info)
 {
-    pid_t   ret;
-    int     wstatus;
+    int     i;
+    pid_t   pid;
+    char    *exe_path;
+    int index;
+    int wstatus;
 
-    if ((ret = fork()) == -1)
+    i = 0;
+    exe_path = NULL;
+    index = 0;
+    while (i < info->pipe_count + 1)
     {
-        perror("fork");
-        exit(1);
-    }
-    else if (ret == 0) //child process
-        dopipes(0, info);
-    else
-    {
-        //parent process
-        set_signal_parent();
-        wait(&wstatus);
-        // printf("{%d}\n", wstatus);
-        if (wstatus == SIGINT)
-            write(1, "\n", 1);
-        else if (wstatus == SIGQUIT)
-            write(1, "QUIT: 3\n", 8);
-        // if (wstatus < 256)
-        // {
-        if (wstatus == SIGINT || wstatus == SIGQUIT)
+        pid = fork();
+        if (pid == -1)
+            function_error("fork");
+        else if (pid == 0)
         {
-            g_signal.status = 128 + wstatus;
-            g_signal.other_code = TRUE;
+            set_signal_child();
+            make_info_argv(info, info->pipe_place[i + 1], info->pipe_place[i]);
+            check_redirect(info);
+            do_fd(info, i);
+            
+            exe_path = info->argv[0];
+            while (access(exe_path, X_OK))
+            {
+                if (ft_strchr(info->argv[0], '/') == NULL)
+                    exe_path = make_exepath((info->path)[index], (info->argv)[0]);
+                else
+                    exe_path = info->argv[0];
+                index++;
+            }
+            if (exe_path == NULL)
+            {
+                // printf("%s, %d\n", __FILE__, __LINE__);
+                err_exit(info->argv[0], "command not found");
+            }
+            if (access(exe_path, X_OK) < 0)
+            {
+                // printf("%s, %d\n", __FILE__, __LINE__);
+                err_exit(info->argv[0], "command not found");
+            }
+            execve(exe_path, info->argv, list_to_array(info->list));
+            function_error("execve");
         }
         else
         {
-            g_signal.status = WEXITSTATUS(wstatus);
-            g_signal.other_code = TRUE;
+            set_signal_parent();
+            if (i > 0)
+            {
+                close(info->pipefd[i - 1][0]);
+                close(info->pipefd[i - 1][1]);
+            }
         }
-        // }
-        // else
-        // {
-        //     printf("<%d>\n", wstatus);
-        //     // g_signal.status = wstatus / 256;
-        //     g_signal.status = WEXITSTATUS(wstatus);
-        //     printf("%d\n", g_signal.status);
-        // }
+        i++;
+    }
+    i = 0;
+    while (i < info->pipe_count + 1)
+    {
+        wait(&wstatus);
+        i++;
+    }
+    if (wstatus == SIGINT)
+        write(1, "\n", 1);
+    else if (wstatus == SIGQUIT)
+        write(1, "QUIT: 3\n", 8);
+    if (wstatus == SIGINT || wstatus == SIGQUIT)
+    {
+        g_signal.status = 128 + wstatus;
+        g_signal.other_code = TRUE;
+    }
+    else
+    {
+        g_signal.status = WEXITSTATUS(wstatus);
+        g_signal.other_code = TRUE;
     }
 }
-
 /*-------------------------------------------------------------*/
 
 int count_pipe(t_info *info)
@@ -626,96 +512,99 @@ int *place_pipe(t_info *info)
     int i;
     int j;
 
-    if (info->pipe_count == 0)
-    {
-        ret = (int *)malloc(sizeof(int) * 1);
-        if (ret == NULL)
-            function_error("malloc6");
-        ret[0] = -1;
-        return (ret);
-    }
-    ret = (int *)malloc(sizeof(int) * (info->pipe_count));
+    ret = (int *)malloc(sizeof(int) * (info->pipe_count + 2));
     if (ret == NULL)
         function_error("malloc7");
-    i = info->argc - 1;
-    j = 0;
-    while (i >= 0)
-    {
-        if (*(info->cmd[i]) == '|' && ft_strlen(info->cmd[i]) == 1)
-            ret[j++] = i;
-        i--;
-    }
-    return (ret);
-}
-
-int count_list_len(t_environ *list)
-{
-    int count;
-
-    count = 0;
-    while (list != NULL)
-    {
-        count++;
-        list = list->next;
-    }
-    return (count);
-}
-
-char **list_to_array(t_environ *list)
-{
-    char **ret;
-    char *tmp;
-    int i;
-    
+    ret[0] = -1;
+    ret[info->pipe_count + 1] = info->argc;
     i = 0;
-    ret = (char **)malloc(sizeof(char *) * (count_list_len(list) + 1));
-    if (!ret)
-        function_error("malloc");
-    while (list != NULL)
+    j = 1;
+    // printf("%s, %d\n", __FILE__, __LINE__);
+    while (i < info->argc)
     {
         // printf("%s, %d\n", __FILE__, __LINE__);
-        tmp = ft_strjoin(list->key, "=");
-        ret[i] = ft_strjoin(tmp, list->value);
-        free(tmp);
-        list = list->next;
+        if (*(info->cmd[i]) == '|' && ft_strlen(info->cmd[i]) == 1)
+            ret[j++] = i;
         i++;
     }
-    ret[i] = NULL;
+    // printf("%s, %d\n", __FILE__, __LINE__);
+
+    //pipefd作る
+    info->pipefd = (int **)malloc(sizeof(int *) * (info->pipe_count));
+    if (info->pipefd == NULL)
+        function_error("malloc");
+    // printf("%s, %d\n", __FILE__, __LINE__);
+    i = 0;
+    // printf("%s, %d\n", __FILE__, __LINE__);
+    while (i < info->pipe_count)
+    {
+        // printf("%s, %d\n", __FILE__, __LINE__);
+        info->pipefd[i] = (int *)malloc(sizeof(int) * 2);
+        if (info->pipefd[i] == NULL)
+        {
+            malloc_error_free(info->pipefd, i);
+            function_error("malloc");
+        }
+        i++;
+    }
+    // printf("%s, %d\n", __FILE__, __LINE__);
+    i = 0;
+    while (i < info->pipe_count)
+        pipe(info->pipefd[i++]);
+    // printf("%s, %d\n", __FILE__, __LINE__);
     return (ret);
 }
 
 void    info_init(t_info *info, int argc, char **argv, t_environ *list)
 {
     info->input_fd = 0;
-    info->output_fd = 0;
+    info->output_fd = 1;
     info->argc = argc;//cmdの数  
     info->argv = NULL;   
     info->cmd = argv;
     info->pipe_count = count_pipe(info);
     info->path = make_path_list(list);
-    info->envp = list_to_array(list);
+    info->list = list;
+    // printf("%s, %d\n", __FILE__, __LINE__);
+    info->pipefd = NULL;
     info->pipe_place = place_pipe(info);
     info->heredoc_flag = 0;
+    // printf("%s, %d\n", __FILE__, __LINE__);
+    // int i = 0;
+    // while (i < info->pipe_count + 2)
+    // {
+    //     printf("%d\n", info->pipe_place[i]);
+    //     i++;
+    // }
+    // exit(1);
+    // info->heredoc_flag = 0;
 }
 
 /*---------------------------------------------------------------*/
 
 void    finish(t_info *info)
 {
+    int i;
+
+    i = 0;
     safty_free(info->path);
-    safty_free(info->envp);
+    safty_free(info->cmd);
     free(info->pipe_place);
-    // close(info->input_fd);
-    // close(info->output_fd);
+    while (i < info->pipe_count)
+    {
+        free(info->pipefd[i]);
+        i++;
+    }
+    free(info->pipefd);
+    info->pipefd = NULL;
 }
 
 
 void pipex(int argc, char **argv, t_environ *list)
 {
     t_info  info;
-    int     i;
-    int		wstatus;
     
+    // printf("%s, %d\n", __FILE__, __LINE__);
     info_init(&info, argc, argv, list);
     multiple_pipes(&info);
     finish(&info);

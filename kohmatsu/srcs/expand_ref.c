@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/22 01:40:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/28 12:40:50 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/01 17:10:02 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,13 +170,15 @@ void	quote_removal(t_token *tok, t_environ *list)
 void	write_to_heredoc_one(char **array, int i)
 {
 	char	*line;
+	int		heredoc_fd;
 	
-	g_signal.heredoc_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
-    if (g_signal.heredoc_fd == -1)
+	heredoc_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
+    if (heredoc_fd == -1)
         function_error("open");
 	heredoc_signal();
     while (1)
     {
+		// printf("%s, %d\n", __FILE__, __LINE__);
         line = readline("> ");
 		if (line == NULL)
 			break ;
@@ -185,26 +187,27 @@ void	write_to_heredoc_one(char **array, int i)
 			free(line);
             break ;
 		}
-        write(g_signal.heredoc_fd, line, ft_strlen(line));
-        write(g_signal.heredoc_fd, "\n", 1);
+        write(heredoc_fd, line, ft_strlen(line));
+        write(heredoc_fd, "\n", 1);
         free(line);
     }
 	dup2(g_signal.input_fd, 0);
 	close(g_signal.input_fd);
-    close(g_signal.heredoc_fd);
+    close(heredoc_fd);
 }
 
 void	write_to_heredoc_not_one(char **array, int i, int *heredoc_flag)
 {
 	char	*line;
+	int		heredoc_fd;
 
 	if (ft_strncmp(array[i + 4], "<<", 2) == 0)
         return ;
 	// printf("%s, %d\n", __FILE__, __LINE__);
 	heredoc_signal();
     *heredoc_flag = 1;
-    g_signal.heredoc_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
-    if (g_signal.heredoc_fd == -1)
+    heredoc_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
+    if (heredoc_fd == -1)
         function_error("open");
 	// printf("%s, %d\n", __FILE__, __LINE__);
     while (1)
@@ -232,15 +235,15 @@ void	write_to_heredoc_not_one(char **array, int i, int *heredoc_flag)
 				free(line);
 				break ;
 			}
-			write(g_signal.heredoc_fd, line, ft_strlen(line));
-			write(g_signal.heredoc_fd, "\n", 1);
+			write(heredoc_fd, line, ft_strlen(line));
+			write(heredoc_fd, "\n", 1);
 			free(line);
 		}
 	}
 	// printf("%s, %d\n", __FILE__, __LINE__);
     dup2(g_signal.input_fd, 0);
 	close(g_signal.input_fd);
-    close(g_signal.heredoc_fd);
+    close(heredoc_fd);
 }
 
 char	**expand(t_token *tok, t_environ *list)

@@ -1,6 +1,6 @@
 NAME = minishell
 SRCDIR = ./srcs/
-SRCS = token_list_to_array.c destructer_ref.c error_ref.c expand_ref.c main_ref.c tokenize_ref.c pipe_ref.c \
+SRCS = token_list_to_array.c destructer_ref.c error_ref.c expand_ref.c main_ref.c tokenize_ref.c pipe.c \
 		make_environ.c signal.c search_env.c
 
 CC = gcc

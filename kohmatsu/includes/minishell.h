@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 22:43:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/02/28 12:49:30 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/01 15:02:23 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,26 +59,29 @@ struct s_token{
 	t_token			*next;
 };
 
+typedef struct s_environ {
+    char *key;
+    char *value;
+    struct s_environ *next;
+}t_environ;
+
 typedef struct s_info{
     int     input_fd;
     int     output_fd;
+    int     **pipefd;
     int     argc;//cmdの数
     int     pipe_count;//(pipeの個数)
     char    **cmd;//実行コマンド(全部)
     char    **argv;//実行コマンド(部分的)
     int     argv_count;//実行コマンドの数(部分的)
     char    **path;//search path
-    char    **envp;//環境変数
+    // char    **envp;//環境変数
+    t_environ *list;
     int     *pipe_place;//pipeの位置インデックス
-    int    heredoc_flag;
+    int    heredoc_flag;//heredocを行なったかどうか
     // int     heredoc_count; 
 }t_info;
 
-typedef struct s_environ {
-    char *key;
-    char *value;
-    struct s_environ *next;
-}t_environ;
 
 typedef struct s_signal {
     int status;//status code
@@ -103,7 +106,7 @@ void    tokenize_error(char *message, char **rest, char *line);
 void	assert_error(const char *msg);
 void	err_exit(const char *location, const char *msg);
 
-//pipe_ref.c
+//execute.c
 void     pipex(int argc, char *argv[], t_environ *list);
 int count_heredoc(char **argv);
 
