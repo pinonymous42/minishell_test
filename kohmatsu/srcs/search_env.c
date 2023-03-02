@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/26 13:27:36 by kohmatsu          #+#    #+#             */
-/*   Updated: 2023/02/26 13:27:54 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/01 19:45:27 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,5 @@ char *search_env(char *key, t_environ *list)
         list = list->next;
     }
     // printf("%s, %d\n", __FILE__, __LINE__);
-    return ("");
+    return (NULL);
 }
