@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/22 01:40:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/03/01 20:27:25 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/02 15:12:50 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	append_char(char **s, char c)
 	size = 2;
 	if (*s)
 		size += strlen(*s);
-	new = malloc(size);
+	new = malloc(sizeof(char) * size);
 	if (new == NULL)
 		function_error("malloc");
 	if (*s)
@@ -183,6 +183,8 @@ void	write_to_heredoc_one(char **array, int i, int not_expand_flag, t_environ *l
 	char	*line;
 	int		heredoc_fd;
 	char	*tmp;
+	char	*head;
+	char	*ptr;
 	
 	heredoc_fd = open(".heredoc", (O_WRONLY | O_CREAT | O_TRUNC), 0644);
     if (heredoc_fd == -1)
@@ -194,20 +196,20 @@ void	write_to_heredoc_one(char **array, int i, int not_expand_flag, t_environ *l
         line = readline("> ");
 		if (line == NULL)
 			break ;
-		if (ft_strncmp(line, array[i + 1], ft_strlen(array[i + 1])) == 0)
+		if (ft_strncmp(line, array[i + 1], ft_strlen(line)) == 0)
 		{
 			free(line);
             break ;
 		}
-		if (not_expand_flag == 0 && search_env(line + 1, list))
+		if (not_expand_flag == 0 && ft_strchr(line, '$'))
 		{
-			tmp = search_env(line + 1, list);
-			free(line);
-			line = tmp;
+			while (ft_strchr(line, '$'))
+				line = double_variable_expand(line, list);
 		}
         write(heredoc_fd, line, ft_strlen(line));
         write(heredoc_fd, "\n", 1);
-        free(line);
+		// if (line)
+		free(line);
     }
 	dup2(g_signal.input_fd, 0);
 	close(g_signal.input_fd);
