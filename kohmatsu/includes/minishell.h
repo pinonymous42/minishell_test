@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 22:43:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/03/01 15:02:23 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/03 17:14:49 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,7 @@ typedef struct s_signal {
     int status;//status code
     int heredoc_fd;//.heredocのfd
     int input_fd;//input(0)のfd
+    int output_fd;//output(1)のfd
     int other_code;//status codeが0以外の時に用いる
 }t_signal;
 
@@ -105,6 +106,7 @@ void    function_error(char *function_name);
 void    tokenize_error(char *message, char **rest, char *line);
 void	assert_error(const char *msg);
 void	err_exit(const char *location, const char *msg);
+void	file_not_found(const char *filename);
 
 //execute.c
 void     pipex(int argc, char *argv[], t_environ *list);
@@ -130,5 +132,17 @@ int    heredoc_signal(void);
 
 // search_env.c
 char *search_env(char *key, t_environ *list);
+
+//cd_builtin.c
+void    cd_builtin(t_info *info);
+
+//echo_builtin.c
+void    echo_builtin(t_info *info);
+
+//env_builtin.c
+void    env_builtin(t_info *info);
+
+// exit_builtin.c
+void    exit_builtin(t_info *info);
 
 #endif

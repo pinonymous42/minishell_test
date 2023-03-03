@@ -1,31 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_bzero.c                                         :+:      :+:    :+:   */
+/*   env_builtin.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/10/05 11:55:05 by kohmatsu          #+#    #+#             */
-/*   Updated: 2022/10/18 14:32:25 by kohmatsu         ###   ########.fr       */
+/*   Created: 2023/03/03 14:26:14 by kohmatsu          #+#    #+#             */
+/*   Updated: 2023/03/03 14:33:04 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../includes/minishell.h"
 
-void	ft_bzero(void *s, size_t n)
+void    env_builtin(t_info *info)
 {
-	ft_memset(s, '\0', n);
+    t_environ *tmp;
+
+    tmp = info->list;
+    while (tmp)
+    {
+        ft_putstr_fd(tmp->key, STDOUT);
+        write(1, "=", 1);
+        ft_putstr_fd(tmp->value, STDOUT);
+        write(1, "\n", 1);
+        tmp = tmp->next;
+    }
 }
-
-// #include <stdio.h>
-// #include <strings.h>
-// int main(void)
-// {
-// 	char s[] = "abcdefghi";
-// 	bzero(s + 3, 0);
-// 	printf("%s\n\n", s);
-
-// 	char s1[] = "abcdefghi";
-// 	ft_bzero(s1 + 3, 0);
-// 	printf("%s\n\n", s1);
-// }
