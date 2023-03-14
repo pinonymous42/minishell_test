@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/22 01:40:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/03/13 17:48:39 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/14 11:10:45 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,28 +101,28 @@ void	double_expand_status(char **ret, char **new_word)
 
 char	*double_variable_expand(char *new_word, t_environ *list)
 {
-    char	*tmp;
-    char	*ret;
+	char	*tmp;
+	char	*ret;
 
 	g_signal.do_split = 1;
-    tmp = new_word;
-    while (*new_word != '$')
-        new_word++;
-    if (new_word == tmp)
-        ret = ft_calloc(sizeof(char), 1);
-    else
-        ret = ft_strndup(tmp, new_word - tmp);
-    new_word++;
-    if (*new_word == '?')
+	tmp = new_word;
+	while (*new_word != '$')
+		new_word++;
+	if (new_word == tmp)
+		ret = ft_calloc(sizeof(char), 1);
+	else
+		ret = ft_strndup(tmp, new_word - tmp);
+	new_word++;
+	if (*new_word == '?')
 		double_expand_status(&ret, &new_word);
-    else
-    {
+	else
+	{
 		double_expansion(&new_word, &ret, list);
 		double_moving(&new_word);
-    }
-    ret = ft_strjoin_with_free(ret, new_word, FIRST_PARAM);
-    free(tmp);
-    return (ret);
+	}
+	ret = ft_strjoin_with_free(ret, new_word, FIRST_PARAM);
+	free(tmp);
+	return (ret);
 }
 
 void	remove_single_quote(char **p, char **new_word)
@@ -164,7 +164,7 @@ void	expand_status(char **p, char **new_word)
 void	expansion(char **p, char **new_word, t_environ *list)
 {
 	char	*var;
-	
+
 	if (ft_strchr(*p, '$'))
 		var = ft_strndup(*p, ft_strchr(*p, '$') - *p);
 	else
@@ -184,7 +184,8 @@ void	expansion(char **p, char **new_word, t_environ *list)
 	if (*new_word == NULL)
 		*new_word = ft_strdup(search_env(var, list));
 	else
-		*new_word = ft_strjoin_with_free(*new_word, search_env(var, list), FIRST_PARAM);
+		*new_word = ft_strjoin_with_free(*new_word,
+				search_env(var, list), FIRST_PARAM);
 	free(var);
 }
 
@@ -217,7 +218,8 @@ void	expand_variable(char **p, char **new_word, t_environ *list)
 
 void	just_append(t_token *tok, char **p, char **new_word)
 {
-	if (ft_strcmp(tok->word, "<<") == 0 && ft_strchr(tok->next->word, '\"') && ft_strcmp(tok->next->next->word, "<<") == 1)
+	if (ft_strcmp(tok->word, "<<") == 0 && ft_strchr(tok->next->word, '\"')
+		&& ft_strcmp(tok->next->next->word, "<<") == 1)
 		g_signal.not_expand_flag = 1;
 	append_char(new_word, **p);
 	*p += 1;
