@@ -6,11 +6,12 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/05 18:19:56 by kohmatsu          #+#    #+#             */
-/*   Updated: 2022/10/19 13:17:47 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/13 12:37:41 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
+// #include <stdio.h>
 
 char	*ft_strrchr(const char *s, int c)
 {

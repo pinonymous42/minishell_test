@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/20 22:43:55 by yokitaga          #+#    #+#             */
-/*   Updated: 2023/03/03 17:14:49 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/13 16:09:17 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 
 # define SINGLE_QUOTE '\''
 # define DOUBLE_QUOTE '"'
+// # define NO_SUCH_ENV  "No_such_environment_variable"
 
 # define RIGHT 1
 # define MID 0
@@ -70,15 +71,15 @@ typedef struct s_info{
     int     output_fd;
     int     **pipefd;
     int     argc;//cmdの数
-    int     pipe_count;//(pipeの個数)
     char    **cmd;//実行コマンド(全部)
     char    **argv;//実行コマンド(部分的)
     int     argv_count;//実行コマンドの数(部分的)
     char    **path;//search path
     // char    **envp;//環境変数
+    //bool    updata_list;//環境変数の更新があったかどうか
     t_environ *list;
-    int     *pipe_place;//pipeの位置インデックス
     int    heredoc_flag;//heredocを行なったかどうか
+    int *pipe_place;//pipeの位置インデックス
     // int     heredoc_count; 
 }t_info;
 
@@ -89,6 +90,9 @@ typedef struct s_signal {
     int input_fd;//input(0)のfd
     int output_fd;//output(1)のfd
     int other_code;//status codeが0以外の時に用いる
+    int do_split;//splitを行うかどうか
+    int pipe_count;//(pipeの個数)
+    int not_expand_flag;
 }t_signal;
 
 //global variable
@@ -100,17 +104,24 @@ char	**token_list_to_array(t_token *token);
 //destruter_ref.c
 void	free_token(t_token *token);
 void	free_array(char **array);
+void	free_list(t_environ *list);
 
 //error_ref.c
 void    function_error(char *function_name);
 void    tokenize_error(char *message, char **rest, char *line);
+void    tokenize_error_2(char *message, char *word);
 void	assert_error(const char *msg);
 void	err_exit(const char *location, const char *msg);
+void	command_not_found(const char *location);
 void	file_not_found(const char *filename);
+int     my_dprintf(int fd, const char *fmt, ...);
+void    ambiguous_redirect(char *filename);
 
-//execute.c
+//pipe.c
 void     pipex(int argc, char *argv[], t_environ *list);
 int count_heredoc(char **argv);
+char **list_to_array(t_environ *list);
+int count_pipe(t_token *token);
 
 //tokenize_ref.c
 t_token *tokenize(char *line);
@@ -119,15 +130,18 @@ char *ft_strndup(char *str, size_t n);
 
 //expand_ref.c
 char	**expand(t_token *tok, t_environ *list);
+int	ft_strcmp(char *str1, char *str2);
 
 //make_environ.c
 t_environ *make_environ(char **envp);
+t_environ *new_list(char *envp);
+void      list_add_back(t_environ **list, t_environ *new);
 
 // signal.c
 int set_signal(void);
 int set_signal_child(void);
 int set_signal_parent(void);
-int    heredoc_signal(void);
+int heredoc_signal(void);
 
 
 // search_env.c
@@ -137,12 +151,23 @@ char *search_env(char *key, t_environ *list);
 void    cd_builtin(t_info *info);
 
 //echo_builtin.c
-void    echo_builtin(t_info *info);
+void    echo_builtin(t_info *info, int j);
 
 //env_builtin.c
 void    env_builtin(t_info *info);
 
 // exit_builtin.c
 void    exit_builtin(t_info *info);
+
+// pwd_builtin.c
+void    pwd_builtin(t_info *info);
+
+//export_builtin.c
+int	    ft_strchr_index(const char *str, char c);
+void    export_builtin(t_info *info, t_environ *list);
+int     not_allowed_variant_character(char *key);
+
+//unset_builtin.c
+void    unset_builtin(t_info *info, t_environ *list);
 
 #endif

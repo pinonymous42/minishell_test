@@ -6,7 +6,7 @@
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/05 17:32:41 by kohmatsu          #+#    #+#             */
-/*   Updated: 2023/01/18 18:28:33 by kohmatsu         ###   ########.fr       */
+/*   Updated: 2023/03/13 12:42:58 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,13 @@ char	*ft_strchr(const char *s, int c)
 {
 	char	*ans;
 
+	if (s == NULL)
+		return (NULL);
 	ans = (char *)s;
 	while (*ans != (char)c)
 	{
 		if (*ans == '\0')
-			return (0);
+			return (NULL);
 		ans++;
 	}
 	return (ans);

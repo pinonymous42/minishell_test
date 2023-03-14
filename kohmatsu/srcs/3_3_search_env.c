@@ -1,35 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strlen.c                                        :+:      :+:    :+:   */
+/*   3_3_search_env.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kohmatsu <kohmatsu@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/10/05 11:55:17 by kohmatsu          #+#    #+#             */
-/*   Updated: 2023/03/13 12:37:36 by kohmatsu         ###   ########.fr       */
+/*   Created: 2023/02/26 13:27:36 by kohmatsu          #+#    #+#             */
+/*   Updated: 2023/03/13 16:17:53 by kohmatsu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
-#include <stdio.h>
+#include "../includes/minishell.h"
 
-size_t	ft_strlen(const char *s)
+char *search_env(char *key, t_environ *list)
 {
-	size_t	len;
-
-	len = 0;
-	while (*s != '\0')
-	{
-		len++;
-		s++;
-	}
-	return (len);
+    while (list != NULL)
+    {
+        if (ft_strcmp(list->key, key) == 0)
+            return (list->value);
+        list = list->next;
+    }
+    return (NULL);
 }
-
-// #include <stdio.h>
-// int main(void)
-// {
-// 	char s[] = "";
-// 	printf("%zu", ft_strlen(s));
-// 	return (0);
-// }
